@@ -117,3 +117,19 @@ fn test_problem_double_sol() {
     assert!(sols.next().unwrap() == expected2);
     assert!(sols.next().is_none());
 }
+
+#[test]
+fn test_problem_triple_sol() {
+    let p = Problem::from_arr([
+        [3, 0, 9, 6, 0, 0, 4, 0, 0],
+        [0, 0, 0, 7, 0, 9, 0, 0, 0],
+        [0, 8, 7, 0, 0, 0, 0, 0, 0],
+        [7, 5, 0, 0, 6, 0, 2, 3, 0],
+        [6, 0, 0, 9, 0, 4, 0, 0, 8],
+        [0, 2, 8, 0, 5, 0, 0, 4, 1],
+        [0, 0, 0, 0, 0, 0, 5, 9, 0],
+        [0, 0, 0, 1, 9, 6, 0, 0, 7],
+        [0, 0, 6, 0, 0, 0, 1, 0, 4]
+    ]);
+    assert_eq!(p.solutions().count(), 3);
+}
