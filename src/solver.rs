@@ -104,24 +104,31 @@ impl SolutionGrid {
         self.0[row][col].forbid(val)
     }
 
-    fn find_fuzzy_unique(&self) -> Option<(usize, usize, Value)> {
+    /// Find all fuzzy cells with only one possibility left.
+    fn find_fuzzy_uniques(&self) -> Vec<(usize, usize, Value)> {
+        let mut out = Vec::new();
         for row in 1..9 {
             for col in 1..9 {
                 if let Some(sc) = self.0[row][col].fuzzy_constraint() {
                     if let Some(val) = sc.unique_solution() {
-                        return Some((row, col, val))
+                        out.push((row, col, val))
                     }
                 }
             }
         }
-        None
+        out
     }
 
     fn maximize_constraints(&mut self) -> SolResult<()> {
-        while let Some((row, col, cons)) = self.find_fuzzy_unique() {
-            self.constrain(row, col, cons)?;
+        loop {
+            let uniques = self.find_fuzzy_uniques();
+            if uniques.is_empty() {
+                break Ok(());
+            }
+            for (row, col, val) in uniques {
+                self.constrain(row, col, val)?;
+            }
         }
-        Ok(())
     }
 
     /// Find the fuzzy cell with the least possibilities.
