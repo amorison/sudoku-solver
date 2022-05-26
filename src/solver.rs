@@ -78,7 +78,7 @@ impl SolutionGrid {
             .all(|cs| cs.is_fixed())
     }
 
-    fn constrain(&mut self, row: usize, col: usize, val: Value) -> SolResult<()> {
+    fn pin(&mut self, row: usize, col: usize, val: Value) -> SolResult<()> {
         self.0[row][col].pin(val)?;
         for i in 0..9 {
             if i != row {
@@ -126,7 +126,7 @@ impl SolutionGrid {
                 break Ok(());
             }
             for (row, col, val) in uniques {
-                self.constrain(row, col, val)?;
+                self.pin(row, col, val)?;
             }
         }
     }
@@ -158,7 +158,7 @@ impl TryFrom<&Problem> for SolutionGrid {
         for row in 0..9 {
             for col in 0..9 {
                 if let Some(c) = value.get(row, col) {
-                    sgrid.constrain(row, col, c)?;
+                    sgrid.pin(row, col, c)?;
                 }
             }
         }
@@ -200,7 +200,7 @@ impl Iterator for SolutionIterator {
                     if grid.forbid(row, col, val).is_ok() {
                         self.maximize_and_push(grid);
                     }
-                    if new_grid.constrain(row, col, val).is_ok() {
+                    if new_grid.pin(row, col, val).is_ok() {
                         self.maximize_and_push(new_grid);
                     }
                 }
