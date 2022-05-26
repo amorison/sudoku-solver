@@ -107,8 +107,8 @@ impl SolutionGrid {
     /// Find all fuzzy cells with only one possibility left.
     fn find_fuzzy_uniques(&self) -> Vec<(usize, usize, Value)> {
         let mut out = Vec::new();
-        for row in 1..9 {
-            for col in 1..9 {
+        for row in 0..9 {
+            for col in 0..9 {
                 if let Some(sc) = self.0[row][col].fuzzy_constraint() {
                     if let Some(val) = sc.unique_solution() {
                         out.push((row, col, val))
