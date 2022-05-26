@@ -49,6 +49,12 @@ fn empty_problem_sol() {
 }
 
 #[test]
+fn empty_problem_1000_sols() {
+    let p = Problem::new();
+    assert_eq!(p.solutions().take(1000).count(), 1000);
+}
+
+#[test]
 fn test_problem_single_sol() {
     let p = Problem::from_arr([
         [0, 5, 0, 0, 0, 0, 0, 0, 6],
