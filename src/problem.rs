@@ -50,7 +50,7 @@ impl Problem {
         self.0[row][col]
     }
 
-    pub fn constrain(&mut self, row: usize, col: usize, val: Value) {
+    pub fn pin(&mut self, row: usize, col: usize, val: Value) {
         self.0[row][col] = Some(val);
     }
 

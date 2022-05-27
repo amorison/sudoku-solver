@@ -4,8 +4,8 @@ use crate::soft::SoftConstraint;
 #[test]
 fn no_sol_direct_constraint_conflict() {
     let mut p = Problem::new();
-    p.constrain(0, 0, Value::new(1));
-    p.constrain(0, 1, Value::new(1));
+    p.pin(0, 0, Value::new(1));
+    p.pin(0, 1, Value::new(1));
     assert!(p.solutions().next().is_none());
 }
 
@@ -13,10 +13,10 @@ fn no_sol_direct_constraint_conflict() {
 fn no_sol_cell_with_no_possibility() {
     let mut p = Problem::new();
     for i in 0..6 {
-        p.constrain(0, i, Value::new((i + 1) as u8));
+        p.pin(0, i, Value::new((i + 1) as u8));
     }
     for i in 6..9 {
-        p.constrain(1, i, Value::new((i + 1) as u8));
+        p.pin(1, i, Value::new((i + 1) as u8));
     }
     assert!(p.solutions().next().is_none());
 }
