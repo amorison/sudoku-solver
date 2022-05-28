@@ -137,6 +137,54 @@ impl Puzzle {
     }
 
     /// Create an iterator through all the solutions of the [`Puzzle`].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use sudoku_solver::Puzzle;
+    ///
+    /// // Build a puzzle with two solutions.
+    /// let p = Puzzle::from_arr([
+    ///     [0, 0, 3, 4, 5, 6, 7, 8, 9],  // this row can start with 1,2 or 2,1
+    ///     [4, 5, 6, 7, 8, 9, 1, 2, 3],
+    ///     [7, 8, 9, 1, 2, 3, 4, 5, 6],
+    ///     [0, 0, 4, 8, 3, 5, 9, 6, 7],  // this one can start with 2,1 or 1,2
+    ///     [8, 3, 5, 6, 9, 7, 2, 1, 4],
+    ///     [6, 9, 7, 2, 1, 4, 5, 3, 8],
+    ///     [3, 4, 2, 5, 7, 8, 6, 9, 1],
+    ///     [5, 6, 8, 9, 4, 1, 3, 7, 2],
+    ///     [9, 7, 1, 3, 6, 2, 8, 4, 5]
+    /// ]);
+    ///
+    /// // Both expected solutions.
+    /// let expected1 = [
+    ///     [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    ///     [4, 5, 6, 7, 8, 9, 1, 2, 3],
+    ///     [7, 8, 9, 1, 2, 3, 4, 5, 6],
+    ///     [2, 1, 4, 8, 3, 5, 9, 6, 7],
+    ///     [8, 3, 5, 6, 9, 7, 2, 1, 4],
+    ///     [6, 9, 7, 2, 1, 4, 5, 3, 8],
+    ///     [3, 4, 2, 5, 7, 8, 6, 9, 1],
+    ///     [5, 6, 8, 9, 4, 1, 3, 7, 2],
+    ///     [9, 7, 1, 3, 6, 2, 8, 4, 5]
+    /// ];
+    /// let expected2 = [
+    ///     [2, 1, 3, 4, 5, 6, 7, 8, 9],
+    ///     [4, 5, 6, 7, 8, 9, 1, 2, 3],
+    ///     [7, 8, 9, 1, 2, 3, 4, 5, 6],
+    ///     [1, 2, 4, 8, 3, 5, 9, 6, 7],
+    ///     [8, 3, 5, 6, 9, 7, 2, 1, 4],
+    ///     [6, 9, 7, 2, 1, 4, 5, 3, 8],
+    ///     [3, 4, 2, 5, 7, 8, 6, 9, 1],
+    ///     [5, 6, 8, 9, 4, 1, 3, 7, 2],
+    ///     [9, 7, 1, 3, 6, 2, 8, 4, 5]
+    /// ];
+    ///
+    /// let mut sols = p.solutions();
+    /// assert_eq!(sols.next().unwrap(), expected1);
+    /// assert_eq!(sols.next().unwrap(), expected2);
+    /// assert!(sols.next().is_none());
+    /// ```
     pub fn solutions(&self) -> impl FusedIterator<Item=Grid<u8>> {
         SolutionIterator::with_constraints(self)
     }
