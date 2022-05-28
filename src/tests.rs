@@ -32,23 +32,6 @@ fn soft_constraint() {
 }
 
 #[test]
-fn empty_problem_sol() {
-    let p = Puzzle::default();
-    let expected = [
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        [4, 5, 6, 7, 8, 9, 1, 2, 3],
-        [7, 8, 9, 1, 2, 3, 4, 5, 6],
-        [2, 3, 1, 6, 7, 4, 8, 9, 5],
-        [8, 7, 5, 9, 1, 2, 3, 6, 4],
-        [6, 9, 4, 5, 3, 8, 2, 1, 7],
-        [3, 1, 7, 2, 6, 5, 9, 4, 8],
-        [5, 4, 2, 8, 9, 7, 6, 3, 1],
-        [9, 6, 8, 3, 4, 1, 5, 7, 2]
-    ];
-    assert_eq!(p.solutions().next().unwrap(), expected);
-}
-
-#[test]
 fn empty_problem_1000_sols() {
     let p = Puzzle::default();
     assert_eq!(p.solutions().take(1000).count(), 1000);
