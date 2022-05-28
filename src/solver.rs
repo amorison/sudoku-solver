@@ -82,10 +82,10 @@ impl SolutionGrid {
         self.0[row][col].pin(val)?;
         for i in 0..9 {
             if i != row {
-                self.0[i][col].forbid(val)?;
+                self.forbid(i, col, val)?;
             }
             if i != col {
-                self.0[row][i].forbid(val)?;
+                self.forbid(row, i, val)?;
             }
         }
         let block_row = row / 3;
@@ -93,7 +93,7 @@ impl SolutionGrid {
         for ir in (3 * block_row)..(3 * (block_row + 1)) {
             for ic in (3 * block_col)..(3 * (block_col + 1)) {
                 if ir != row && ic != col {
-                    self.0[ir][ic].forbid(val)?;
+                    self.forbid(ir, ic, val)?;
                 }
             }
         }
