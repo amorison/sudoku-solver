@@ -7,7 +7,7 @@ pub struct SolutionIterator {
 }
 
 impl SolutionIterator {
-    pub fn with_constraints(problem: &Puzzle) -> Self {
+    pub fn new(problem: &Puzzle) -> Self {
         let mut stack = Vec::with_capacity(81);  // could do better
         if let Ok(grid) = problem.try_into() {
             stack.push(grid);

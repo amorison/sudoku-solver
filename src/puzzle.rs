@@ -186,7 +186,7 @@ impl Puzzle {
     /// assert!(sols.next().is_none());
     /// ```
     pub fn solutions(&self) -> impl FusedIterator<Item=Grid<u8>> {
-        SolutionIterator::with_constraints(self)
+        SolutionIterator::new(self)
     }
 }
 
