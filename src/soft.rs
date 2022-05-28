@@ -73,3 +73,32 @@ impl From<Option<Value>> for SoftConstraint {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_num_sols() {
+        let sc = SoftConstraint::default();
+        assert_eq!(sc.num_solutions(), 9);
+    }
+
+    #[test]
+    fn default_non_unique() {
+        let sc = SoftConstraint::default();
+        assert!(sc.unique_solution().is_none());
+    }
+
+    #[test]
+    fn default_smallest_sol() {
+        let sc = SoftConstraint::default();
+        assert_eq!(sc.smallest_solution().unwrap().value(), 1);
+    }
+
+    #[test]
+    fn default_has_solutions() {
+        let sc = SoftConstraint::default();
+        assert!(sc.has_solutions());
+    }
+}

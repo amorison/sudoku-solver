@@ -189,3 +189,79 @@ impl Puzzle {
         SolutionIterator::with_constraints(self)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn direct_conflict_no_sol() {
+        let mut p = Puzzle::default();
+        p.pin(0, 0, Value::new(1));
+        p.pin(0, 1, Value::new(1));
+        assert!(p.solutions().next().is_none());
+    }
+
+    #[test]
+    fn cell_with_no_possibility_no_sol() {
+        let mut p = Puzzle::default();
+        for i in 0..6 {
+            p.pin(0, i, Value::new((i + 1) as u8));
+        }
+        for i in 6..9 {
+            p.pin(1, i, Value::new((i + 1) as u8));
+        }
+        assert!(p.solutions().next().is_none());
+    }
+
+    #[test]
+    fn empty_puzzle_1000_sols() {
+        let p = Puzzle::default();
+        assert_eq!(p.solutions().take(1000).count(), 1000);
+    }
+
+    #[test]
+    fn puzzle_single_sol() {
+        let p = Puzzle::from_arr([
+            [0, 5, 0, 0, 0, 0, 0, 0, 6],
+            [0, 0, 6, 7, 3, 0, 0, 2, 0],
+            [0, 0, 0, 0, 8, 0, 0, 0, 0],
+            [0, 0, 5, 2, 6, 0, 0, 3, 0],
+            [4, 0, 0, 0, 0, 0, 9, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 9, 0, 1, 7, 0, 3, 0, 0],
+            [0, 0, 7, 0, 0, 8, 0, 0, 0],
+            [0, 0, 0, 0, 0, 5, 0, 1, 0]
+        ]);
+        let expected = [
+            [3, 5, 9, 4, 1, 2, 8, 7, 6],
+            [8, 4, 6, 7, 3, 9, 5, 2, 1],
+            [1, 7, 2, 5, 8, 6, 4, 9, 3],
+            [9, 8, 5, 2, 6, 7, 1, 3, 4],
+            [4, 2, 1, 8, 5, 3, 9, 6, 7],
+            [7, 6, 3, 9, 4, 1, 2, 8, 5],
+            [6, 9, 8, 1, 7, 4, 3, 5, 2],
+            [5, 1, 7, 3, 2, 8, 6, 4, 9],
+            [2, 3, 4, 6, 9, 5, 7, 1, 8]
+        ];
+        let mut sols = p.solutions();
+        assert!(sols.next().unwrap() == expected);
+        assert!(sols.next().is_none());
+    }
+
+    #[test]
+    fn puzzle_triple_sol() {
+        let p = Puzzle::from_arr([
+            [3, 0, 9, 6, 0, 0, 4, 0, 0],
+            [0, 0, 0, 7, 0, 9, 0, 0, 0],
+            [0, 8, 7, 0, 0, 0, 0, 0, 0],
+            [7, 5, 0, 0, 6, 0, 2, 3, 0],
+            [6, 0, 0, 9, 0, 4, 0, 0, 8],
+            [0, 2, 8, 0, 5, 0, 0, 4, 1],
+            [0, 0, 0, 0, 0, 0, 5, 9, 0],
+            [0, 0, 0, 1, 9, 6, 0, 0, 7],
+            [0, 0, 6, 0, 0, 0, 1, 0, 4]
+        ]);
+        assert_eq!(p.solutions().count(), 3);
+    }
+}
