@@ -25,9 +25,9 @@ impl Value {
 
 /// A sudoku grid problem, which is a set of constraint.
 #[derive(Default)]
-pub struct Problem([[Option<Value>; 9]; 9]);
+pub struct Puzzle([[Option<Value>; 9]; 9]);
 
-impl Problem {
+impl Puzzle {
     pub fn new() -> Self {
         Self::default()
     }
@@ -43,7 +43,7 @@ impl Problem {
                 (v != 0).then(|| Value::new(v))
             })
         });
-        Problem(inner)
+        Puzzle(inner)
     }
 
     pub fn get(&self, row: usize, col: usize) -> Option<Value> {
@@ -54,7 +54,7 @@ impl Problem {
         self.0[row][col] = Some(val);
     }
 
-    pub fn release(&mut self, row: usize, col: usize) {
+    pub fn unpin(&mut self, row: usize, col: usize) {
         self.0[row][col] = None;
     }
 

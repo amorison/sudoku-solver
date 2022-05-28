@@ -1,9 +1,9 @@
-use crate::problem::{Problem, Value};
+use crate::problem::{Puzzle, Value};
 use crate::soft::SoftConstraint;
 
 #[test]
 fn no_sol_direct_constraint_conflict() {
-    let mut p = Problem::new();
+    let mut p = Puzzle::new();
     p.pin(0, 0, Value::new(1));
     p.pin(0, 1, Value::new(1));
     assert!(p.solutions().next().is_none());
@@ -11,7 +11,7 @@ fn no_sol_direct_constraint_conflict() {
 
 #[test]
 fn no_sol_cell_with_no_possibility() {
-    let mut p = Problem::new();
+    let mut p = Puzzle::new();
     for i in 0..6 {
         p.pin(0, i, Value::new((i + 1) as u8));
     }
@@ -33,7 +33,7 @@ fn soft_constraint() {
 
 #[test]
 fn empty_problem_sol() {
-    let p = Problem::new();
+    let p = Puzzle::new();
     let expected = [
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         [4, 5, 6, 7, 8, 9, 1, 2, 3],
@@ -50,13 +50,13 @@ fn empty_problem_sol() {
 
 #[test]
 fn empty_problem_1000_sols() {
-    let p = Problem::new();
+    let p = Puzzle::new();
     assert_eq!(p.solutions().take(1000).count(), 1000);
 }
 
 #[test]
 fn test_problem_single_sol() {
-    let p = Problem::from_arr([
+    let p = Puzzle::from_arr([
         [0, 5, 0, 0, 0, 0, 0, 0, 6],
         [0, 0, 6, 7, 3, 0, 0, 2, 0],
         [0, 0, 0, 0, 8, 0, 0, 0, 0],
@@ -85,7 +85,7 @@ fn test_problem_single_sol() {
 
 #[test]
 fn test_problem_double_sol() {
-    let p = Problem::from_arr([
+    let p = Puzzle::from_arr([
         [0, 0, 3, 4, 5, 6, 7, 8, 9],  // row can start with 1,2 or 2,1
         [4, 5, 6, 7, 8, 9, 1, 2, 3],
         [7, 8, 9, 1, 2, 3, 4, 5, 6],
@@ -126,7 +126,7 @@ fn test_problem_double_sol() {
 
 #[test]
 fn test_problem_triple_sol() {
-    let p = Problem::from_arr([
+    let p = Puzzle::from_arr([
         [3, 0, 9, 6, 0, 0, 4, 0, 0],
         [0, 0, 0, 7, 0, 9, 0, 0, 0],
         [0, 8, 7, 0, 0, 0, 0, 0, 0],

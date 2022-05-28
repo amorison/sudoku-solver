@@ -1,6 +1,6 @@
 use std::iter::FusedIterator;
 use crate::soft::SoftConstraint;
-use crate::problem::{Value, Problem};
+use crate::problem::{Value, Puzzle};
 
 /// Some operations return this type wrapped in an error to signal that the
 /// grid has no solution.
@@ -150,10 +150,10 @@ impl SolutionGrid {
     }
 }
 
-impl TryFrom<&Problem> for SolutionGrid {
+impl TryFrom<&Puzzle> for SolutionGrid {
     type Error = NoSolError;
 
-    fn try_from(value: &Problem) -> SolResult<Self> {
+    fn try_from(value: &Puzzle) -> SolResult<Self> {
         let mut sgrid = Self::default();
         for row in 0..9 {
             for col in 0..9 {
@@ -172,7 +172,7 @@ pub struct SolutionIterator {
 }
 
 impl SolutionIterator {
-    pub fn with_constraints(problem: &Problem) -> Self {
+    pub fn with_constraints(problem: &Puzzle) -> Self {
         let mut stack = Vec::with_capacity(81);  // could do better
         if let Ok(grid) = problem.try_into() {
             stack.push(grid);
