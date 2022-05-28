@@ -2,22 +2,43 @@ use std::num::NonZeroU8;
 
 use crate::solver::SolutionIterator;
 
-/// Represent a cell that is forced to a given value.
+/// Represent a valid cell value, i.e. an integer between 1 and 9 inclusive.
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Value(NonZeroU8);
 
 impl Value {
-    /// Create a new constrained value.
+    /// Create a new value.
     ///
     /// # Panics
     ///
     /// Panics if `val` is not between 1 and 9 inclusive.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use sudoku_solver::Value;
+    /// let val = Value::new(3);  // represent a cell with the value 3
+    /// # assert_eq!(val.value(), 3);
+    /// ```
+    ///
+    /// ```should_panic
+    /// use sudoku_solver::Value;
+    /// let val = Value::new(0);
+    /// ```
     pub fn new(val: u8) -> Self {
         assert!(val > 0 && val < 10, "Cell value is from 1 to 9, got {val}.");
         Self(val.try_into().unwrap())
     }
 
-    /// The cell value required by the constraint.
+    /// The cell value, always between 1 and 9 inclusive.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use sudoku_solver::Value;
+    /// let val = Value::new(7);
+    /// assert_eq!(val.value(), 7);
+    /// ```
     pub fn value(&self) -> u8 {
         self.0.get()
     }
