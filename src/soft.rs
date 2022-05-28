@@ -77,28 +77,66 @@ impl From<Option<Value>> for SoftConstraint {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Value;
 
     #[test]
     fn default_num_sols() {
         let sc = SoftConstraint::default();
+        assert!(sc.unique_solution().is_none());
+        assert_eq!(sc.smallest_solution().unwrap().value(), 1);
+        assert!(sc.has_solutions());
+        for i in 1..=9 {
+            assert!(sc.has_solution(Value::new(i)));
+        }
         assert_eq!(sc.num_solutions(), 9);
     }
 
     #[test]
-    fn default_non_unique() {
-        let sc = SoftConstraint::default();
-        assert!(sc.unique_solution().is_none());
-    }
-
-    #[test]
-    fn default_smallest_sol() {
-        let sc = SoftConstraint::default();
-        assert_eq!(sc.smallest_solution().unwrap().value(), 1);
-    }
-
-    #[test]
-    fn default_has_solutions() {
-        let sc = SoftConstraint::default();
+    fn from_val() {
+        let sc = SoftConstraint::from(Value::new(6));
+        assert_eq!(sc.unique_solution().unwrap(), Value::new(6));
+        assert_eq!(sc.smallest_solution().unwrap().value(), 6);
         assert!(sc.has_solutions());
+        for i in 1..=9 {
+            assert_eq!(sc.has_solution(Value::new(i)), i == 6);
+        }
+        assert_eq!(sc.num_solutions(), 1);
+    }
+
+    #[test]
+    fn from_opt_val() {
+        let sc = SoftConstraint::from(Some(Value::new(2)));
+        assert_eq!(sc.unique_solution().unwrap(), Value::new(2));
+        assert_eq!(sc.smallest_solution().unwrap().value(), 2);
+        assert!(sc.has_solutions());
+        for i in 1..=9 {
+            assert_eq!(sc.has_solution(Value::new(i)), i == 2);
+        }
+        assert_eq!(sc.num_solutions(), 1);
+    }
+
+    #[test]
+    fn from_none() {
+        let sc = SoftConstraint::from(None);
+        assert!(sc.unique_solution().is_none());
+        assert_eq!(sc.smallest_solution().unwrap().value(), 1);
+        assert!(sc.has_solutions());
+        for i in 1..=9 {
+            assert!(sc.has_solution(Value::new(i)));
+        }
+        assert_eq!(sc.num_solutions(), 9);
+    }
+
+    #[test]
+    fn forbid() {
+        let mut sc = SoftConstraint::from(None);
+        sc.forbid(Value::new(1));
+        assert!(sc.unique_solution().is_none());
+        assert_eq!(sc.smallest_solution().unwrap().value(), 2);
+        assert!(sc.has_solutions());
+        for i in 1..=9 {
+            assert_eq!(sc.has_solution(Value::new(i)), i != 1);
+        }
+        assert_eq!(sc.num_solutions(), 8);
     }
 }
