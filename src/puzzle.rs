@@ -44,16 +44,12 @@ impl Value {
     }
 }
 
-/// A sudoku grid problem, which is a set of constraint.
+/// A sudoku grid puzzle.
 #[derive(Default)]
 pub struct Puzzle([[Option<Value>; 9]; 9]);
 
 impl Puzzle {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    /// Build a Problem from an array of values.  Zeros are ignored.
+    /// Build a [`Puzzle`] from an array of values.  Zeros are seen as non-constrained cells.
     ///
     /// # Panics
     ///

@@ -3,7 +3,7 @@ use crate::soft::SoftConstraint;
 
 #[test]
 fn no_sol_direct_constraint_conflict() {
-    let mut p = Puzzle::new();
+    let mut p = Puzzle::default();
     p.pin(0, 0, Value::new(1));
     p.pin(0, 1, Value::new(1));
     assert!(p.solutions().next().is_none());
@@ -11,7 +11,7 @@ fn no_sol_direct_constraint_conflict() {
 
 #[test]
 fn no_sol_cell_with_no_possibility() {
-    let mut p = Puzzle::new();
+    let mut p = Puzzle::default();
     for i in 0..6 {
         p.pin(0, i, Value::new((i + 1) as u8));
     }
@@ -33,7 +33,7 @@ fn soft_constraint() {
 
 #[test]
 fn empty_problem_sol() {
-    let p = Puzzle::new();
+    let p = Puzzle::default();
     let expected = [
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         [4, 5, 6, 7, 8, 9, 1, 2, 3],
@@ -50,7 +50,7 @@ fn empty_problem_sol() {
 
 #[test]
 fn empty_problem_1000_sols() {
-    let p = Puzzle::new();
+    let p = Puzzle::default();
     assert_eq!(p.solutions().take(1000).count(), 1000);
 }
 
