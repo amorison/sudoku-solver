@@ -1,4 +1,4 @@
-use crate::problem::{Puzzle, Value};
+use crate::{Puzzle, Value};
 use crate::soft::SoftConstraint;
 
 #[test]

@@ -1,6 +1,6 @@
 use std::iter::FusedIterator;
 use crate::soft::SoftConstraint;
-use crate::problem::{Value, Puzzle};
+use crate::puzzle::{Value, Puzzle};
 
 /// Some operations return this type wrapped in an error to signal that the
 /// grid has no solution.

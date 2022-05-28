@@ -1,6 +1,8 @@
 mod solver;
 mod soft;
-pub mod problem;
+mod puzzle;
+
+pub use puzzle::{Puzzle, Value};
 
 #[cfg(test)]
 mod tests;

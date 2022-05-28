@@ -1,4 +1,4 @@
-use crate::problem::Value;
+use crate::puzzle::Value;
 
 const ALL_ON: u16 = (1 << 9) - 1;
 
