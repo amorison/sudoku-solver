@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use crate::puzzle::Value;
 
 const ALL_ON: u16 = (1 << 9) - 1;
@@ -46,10 +48,14 @@ impl SoftConstraint {
         self.0.count_ones()
     }
 
-    /// Combine two constraints, only keeping what is not allowed by
-    /// the other.
+    /// Remove a given value of the possible values.
     pub fn forbid(&mut self, val: Value) {
         self.0 &= ALL_ON - Self::from(val).0;
+    }
+
+    /// Iterate through possible values.
+    pub fn all_values(&self) -> BTreeSet<Value> {
+        (1..=9).map(Value::new).filter(|&v| self.has_solution(v)).collect()
     }
 }
 

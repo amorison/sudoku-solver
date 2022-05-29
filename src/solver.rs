@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use std::iter::FusedIterator;
 use crate::solgrid::SolutionGrid;
 use crate::{Puzzle, Grid};
@@ -46,3 +47,30 @@ impl Iterator for SolutionIterator {
 }
 
 impl FusedIterator for SolutionIterator {}
+
+pub fn possible_values(puzzle: &Puzzle) -> Grid<BTreeSet<u8>> {
+    let mut pvs = Grid::default();
+    let solgrid: SolutionGrid = match puzzle.try_into() {
+        Ok(sg) => sg,
+        Err(_) => return pvs,
+    };
+    for row in 0..9 {
+        for col in 0..9 {
+            for val in solgrid.possible_values(row, col) {
+                if pvs[row][col].contains(&val.value()) {
+                    continue;
+                }
+                let mut pzl: Puzzle = puzzle.clone();
+                pzl.pin(row, col, val);
+                if let Some(sol) = pzl.solutions().next() {
+                    sol.iter().enumerate().for_each(|(ir, r)| {
+                        r.iter().enumerate().for_each(|(ic, &v)| {
+                            pvs[ir][ic].insert(v);
+                        });
+                    });
+                }
+            }
+        }
+    }
+    pvs
+}

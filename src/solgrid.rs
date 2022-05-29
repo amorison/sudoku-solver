@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use crate::puzzle::{Value, Puzzle, Grid};
 use crate::soft::SoftConstraint;
 
@@ -58,6 +60,19 @@ impl CellState {
                 (sc.has_solutions()).then(|| ()).ok_or(NoSolError{})
             },
             _ => Err(NoSolError{}),
+        }
+    }
+
+    fn all_values(&self) -> BTreeSet<Value> {
+        match self {
+            CellState::Pinned(v) => {
+                let mut bset = BTreeSet::new();
+                bset.insert(*v);
+                bset
+            },
+            CellState::Fuzzy(sc) => {
+                sc.all_values()
+            }
         }
     }
 }
@@ -148,6 +163,11 @@ impl SolutionGrid {
             }
         }
         out
+    }
+
+    /// All possible values that have not been ruled out yet.
+    pub fn possible_values(&self, row: usize, col: usize) -> BTreeSet<Value> {
+        self.0[row][col].all_values()
     }
 }
 
