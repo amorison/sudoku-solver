@@ -1,11 +1,13 @@
 use sudoku_solver::{Puzzle, Grid, Value};
+use crate::counter::{CounterUpTo, count_saturated};
 
 /// State of application, contains the sudoku puzzle.
 pub struct App {
     puzzle: Puzzle,
-    solution: Option<Grid<u8>>,
     cur_row: usize,
     cur_col: usize,
+    solution: Option<Grid<u8>>,
+    n_sols: CounterUpTo,
 }
 
 /// All the possibilities for a cell in a sudoku puzzle.
@@ -31,10 +33,11 @@ pub enum Direction {
 }
 
 impl App {
-    /// This keeps the solution up-to-date with the puzzle.
+    /// This keeps the solution and diagnostics up-to-date with the puzzle.
     /// This has to be called everytime the puzzle is changed.
     fn update_solution(&mut self) {
-        self.solution = self.puzzle.solutions().next()
+        self.solution = self.puzzle.solutions().next();
+        self.n_sols = count_saturated(&mut self.puzzle.solutions(), 1000);
     }
 
     /// Set the value of the puzzle at the cursor position.
@@ -85,6 +88,11 @@ impl App {
             Direction::DownBlock => self.cur_row  = (self.cur_row + 3) % 9,
         }
     }
+
+    /// Number of solutions of the current puzzle.
+    pub fn n_solutions(&self) -> CounterUpTo {
+        self.n_sols
+    }
 }
 
 impl Default for App {
@@ -92,9 +100,11 @@ impl Default for App {
     fn default() -> Self {
         let mut app = Self {
             puzzle: Default::default(),
-            solution: Default::default(),
             cur_row: 0,
             cur_col: 0,
+            // these values don't matter, they are updated immediately after.
+            n_sols: CounterUpTo::Exactly(0),
+            solution: Default::default(),
         };
         app.update_solution();
         app
