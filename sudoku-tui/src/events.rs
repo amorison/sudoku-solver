@@ -23,6 +23,7 @@ pub fn event_loop<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::R
                 KeyCode::Char('J' | 'S') => app.move_pos(Direction::DownBlock),
                 KeyCode::Char('K' | 'W') => app.move_pos(Direction::UpBlock),
                 KeyCode::Char('L' | 'D') => app.move_pos(Direction::RightBlock),
+                KeyCode::Char('c') => app = App::default(),
                 KeyCode::Char('q') => return Ok(()),
                 KeyCode::Char('0' | ' ') | KeyCode::Backspace | KeyCode::Delete =>
                     app.unpin_current(),
