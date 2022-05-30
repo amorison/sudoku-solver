@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use sudoku_solver::{Puzzle, Grid, Value};
 use crate::counter::{CounterUpTo, count_saturated};
 
@@ -8,6 +10,7 @@ pub struct App {
     cur_col: usize,
     solution: Option<Grid<u8>>,
     n_sols: CounterUpTo,
+    all_sols: Grid<BTreeSet<u8>>,
 }
 
 /// All the possibilities for a cell in a sudoku puzzle.
@@ -38,6 +41,7 @@ impl App {
     fn update_solution(&mut self) {
         self.solution = self.puzzle.solutions().next();
         self.n_sols = count_saturated(&mut self.puzzle.solutions(), 1000);
+        self.all_sols = self.puzzle.possible_values();
     }
 
     /// Set the value of the puzzle at the cursor position.
@@ -75,6 +79,11 @@ impl App {
         }
     }
 
+    /// All possible values that give a solvable puzzle.
+    pub fn all_vals_at(&self, row: usize, col: usize) -> &BTreeSet<u8> {
+        &self.all_sols[row][col]
+    }
+
     /// Move the cursor in a given direction.
     pub fn move_pos(&mut self, direction: Direction) {
         match direction {
@@ -105,6 +114,7 @@ impl Default for App {
             // these values don't matter, they are updated immediately after.
             n_sols: CounterUpTo::Exactly(0),
             solution: Default::default(),
+            all_sols: Default::default(),
         };
         app.update_solution();
         app

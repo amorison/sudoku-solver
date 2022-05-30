@@ -16,6 +16,9 @@ fn cell_at(app: &App, row: usize, col: usize) -> Cell<'static> {
             format!(" {v} ")
         },
         CellValue::Solution(v) => {
+            if app.all_vals_at(row, col).len() == 1 {
+                style = style.fg(Color::Cyan).add_modifier(Modifier::BOLD);
+            }
             format!(" {v} ")
         }
         CellValue::NoSolution => {
@@ -32,9 +35,9 @@ fn cell_at(app: &App, row: usize, col: usize) -> Cell<'static> {
 pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
-        .margin(1)
         .constraints([
             Constraint::Min(14),
+            Constraint::Length(3),
             Constraint::Length(3),
         ])
         .split(f.size());
@@ -65,7 +68,25 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
     .widths(&widths);
 	f.render_widget(table, chunks[0]);
 
-    let par = Paragraph::new(
+    let (row, col) = app.current_pos();
+    let all_sols_par = Paragraph::new(
+        match app.value_at(row, col) {
+            CellValue::Pinned(v) => format!("Cell pinned to {v}."),
+            CellValue::Solution(v) => {
+                let values = app.all_vals_at(row, col);
+                if values.len() == 1 {
+                    format!("Cell has to be {v}.")
+                } else {
+                    format!("Allowed values: {:?}.", values)
+                }
+            },
+            CellValue::NoSolution => "No solution.".to_owned(),
+        }
+    )
+    .block(Block::default().borders(Borders::ALL));
+    f.render_widget(all_sols_par, chunks[1]);
+
+    let n_sols_par = Paragraph::new(
         match app.n_solutions() {
             CounterUpTo::Exactly(n) =>
                 format!("This puzzle has {n} solutions."),
@@ -74,5 +95,5 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
         }
     )
     .block(Block::default().borders(Borders::ALL));
-    f.render_widget(par, chunks[1]);
+    f.render_widget(n_sols_par, chunks[2]);
 }
