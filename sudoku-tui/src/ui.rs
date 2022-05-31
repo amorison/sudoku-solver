@@ -1,7 +1,7 @@
 use tui::{
     backend::Backend,
     widgets::{Block, Borders, Table, Row, Cell, Paragraph},
-    layout::{Constraint, Layout, Direction},
+    layout::{Constraint, Layout, Direction, Margin, Rect},
     Frame, style::{Style, Modifier, Color}, text::{Spans, Span}
 };
 
@@ -52,19 +52,38 @@ fn cell_at(app: &App, row: usize, col: usize) -> Cell<'static> {
 
 /// Define the UI for a given state of the application.
 pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
+    let height = 19;
+    let width = 72;
+    let full_area = f.size();
+    if full_area.width < width || full_area.height < height {
+        f.render_widget(
+            Paragraph::new(vec![
+                Spans::from(format!("Need {width}x{height} window")),
+                Spans::from("q to quit"),
+            ]),
+            full_area
+        );
+        return;
+    }
+    let area = Rect {
+        x: (full_area.width - width) / 2,
+        y: (full_area.height - height) / 2,
+        height,
+        width
+    };
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
-            Constraint::Percentage(80),
-            Constraint::Percentage(20),
+            Constraint::Length(43),
+            Constraint::Length(29),
         ])
-        .split(f.size());
+        .split(area);
     let help_chunks = chunks[1];
 
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Min(14),
+            Constraint::Max(13),
             Constraint::Length(3),
             Constraint::Length(3),
         ])
@@ -72,11 +91,15 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
     let help_chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Percentage(50),
-            Constraint::Percentage(50),
+            Constraint::Length(13),
+            Constraint::Percentage(6),
         ])
         .split(help_chunks);
 
+    f.render_widget(
+        Block::default().title("Sudoku").borders(Borders::ALL),
+        chunks[0]
+    );
     let mut widths = [Constraint::Length(3); 11];
     widths[3] = Constraint::Length(1);
     widths[7] = Constraint::Length(1);
@@ -99,20 +122,19 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
             }
         })
     )
-    .block(Block::default().title("Sudoku").borders(Borders::ALL))
     .widths(&widths);
-	f.render_widget(table, chunks[0]);
+	f.render_widget(table, chunks[0].inner(&Margin {vertical: 1, horizontal: 2}));
 
     let (row, col) = app.current_pos();
     let all_sols_par = Paragraph::new(
         match app.value_at(row, col) {
-            CellValue::Pinned(v) => format!("Cell pinned to {v}."),
+            CellValue::Pinned(v) => format!("Cell pinned to {v}"),
             CellValue::Solution(v) => {
                 let values = app.all_vals_at(row, col);
                 if values.len() == 1 {
-                    format!("Cell has to be {v}.")
+                    format!("Cell has to be {v}")
                 } else {
-                    format!("Could be: {:?}.", values)
+                    format!("Could be: {:?}", values)
                 }
             },
             CellValue::NoSolution => "No solution.".to_owned(),
@@ -123,10 +145,14 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
 
     let n_sols_par = Paragraph::new(
         match app.n_solutions() {
+            CounterUpTo::Exactly(0) =>
+                "No solution".to_owned(),
+            CounterUpTo::Exactly(1) =>
+                "Unique solution".to_owned(),
             CounterUpTo::Exactly(n) =>
-                format!("This puzzle has {n} solutions."),
+                format!("{n} solutions"),
             CounterUpTo::MoreThan(n) =>
-                format!("This puzzle has more than {n} solutions."),
+                format!("More than {n} solutions"),
         }
     )
     .block(Block::default().borders(Borders::ALL));
@@ -144,7 +170,10 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
             Span::styled("<1-9>", bold), Span::raw(": pin value"),
         ]),
         Spans::from(vec![
-            Span::styled("<0, Del, Suppr>", bold), Span::raw(": unpin"),
+            Span::styled("<0, Space, Suppr>", bold), Span::raw(": unpin"),
+        ]),
+        Spans::from(vec![
+            Span::styled("<c>", bold), Span::raw(": clear"),
         ]),
         Spans::from(vec![
             Span::styled("<q>", bold), Span::raw(": quit"),
