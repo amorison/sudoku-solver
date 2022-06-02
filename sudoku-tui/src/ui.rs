@@ -50,56 +50,91 @@ fn cell_at(app: &App, row: usize, col: usize) -> Cell<'static> {
     Cell::from(text).style(style)
 }
 
+/// Locations of the ui elements
+struct UiLayout {
+    /// The main sudoku grid
+    grid: Rect,
+    /// Set of possibilities for the current cell
+    possibilities: Rect,
+    /// Number of solutions of the grid
+    n_solutions: Rect,
+    /// List of available commands
+    cmd_help: Rect,
+    /// Explanations of the text styles
+    legend: Rect,
+}
+
+impl UiLayout {
+    /// Create the layout, centered on a given area
+    fn new(area: Rect) -> Result<Self, String> {
+        // grid + diagnostics, spacing, help column
+        let widths: [u16; 3] = [43, 1, 29];
+        // grid + commands, diagnostics + legend
+        let heights: [u16;3] = [13, 3, 3];
+        let width: u16 = widths.iter().sum();
+        let height: u16 = heights.iter().sum();
+        if area.width < width || area.height < height {
+            return Err(format!("Need {width}x{height} area"));
+        }
+
+        // the centered area of the size we need to fit all elements
+        let area = Rect {
+            x: (area.width - width) / 2,
+            y: (area.height - height) / 2,
+            height,
+            width
+        };
+
+        // split in columns
+        let chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(widths.map(Constraint::Length))
+            .split(area);
+
+        // split the right column to fit the cmd_help and legend elements
+        let help_chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(heights[0]),
+                Constraint::Length(height - heights[0]),
+            ])
+            .split(chunks[2]);
+
+        // split the left column into grid and diagnostics
+        let chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(heights.map(Constraint::Length))
+            .split(chunks[0]);
+
+        Ok(UiLayout {
+            grid: chunks[0],
+            possibilities: chunks[1],
+            n_solutions: chunks[2],
+            cmd_help: help_chunks[0],
+            legend: help_chunks[1],
+        })
+    }
+}
+
 /// Define the UI for a given state of the application.
 pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
-    let height = 19;
-    let width = 73;
     let full_area = f.size();
-    if full_area.width < width || full_area.height < height {
-        f.render_widget(
-            Paragraph::new(vec![
-                Spans::from(format!("Need {width}x{height} window")),
-                Spans::from("q to quit"),
-            ]),
-            full_area
-        );
-        return;
-    }
-    let area = Rect {
-        x: (full_area.width - width) / 2,
-        y: (full_area.height - height) / 2,
-        height,
-        width
+    let layout = match UiLayout::new(full_area) {
+        Ok(layout) => layout,
+        Err(err) => {
+            f.render_widget(
+                Paragraph::new(vec![
+                    Spans::from(err),
+                    Spans::from("q to quit"),
+                ]),
+                full_area
+            );
+            return;
+        }
     };
-    let chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Length(43),
-            Constraint::Length(1),
-            Constraint::Length(29),
-        ])
-        .split(area);
-    let help_chunks = chunks[2];
-
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Max(13),
-            Constraint::Length(3),
-            Constraint::Length(3),
-        ])
-        .split(chunks[0]);
-    let help_chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Length(13),
-            Constraint::Percentage(6),
-        ])
-        .split(help_chunks);
-
     f.render_widget(
         Block::default().title("Sudoku").borders(Borders::ALL),
-        chunks[0]
+        layout.grid
     );
     let mut widths = [Constraint::Length(3); 11];
     widths[3] = Constraint::Length(1);
@@ -124,7 +159,7 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
         })
     )
     .widths(&widths);
-	f.render_widget(table, chunks[0].inner(&Margin {vertical: 1, horizontal: 2}));
+	f.render_widget(table, layout.grid.inner(&Margin {vertical: 1, horizontal: 2}));
 
     let (row, col) = app.current_pos();
     let all_sols_par = Paragraph::new(
@@ -142,7 +177,7 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
         }
     )
     .block(Block::default().borders(Borders::ALL));
-    f.render_widget(all_sols_par, chunks[1]);
+    f.render_widget(all_sols_par, layout.possibilities);
 
     let n_sols_par = Paragraph::new(
         match app.n_solutions() {
@@ -157,7 +192,7 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
         }
     )
     .block(Block::default().borders(Borders::ALL));
-    f.render_widget(n_sols_par, chunks[2]);
+    f.render_widget(n_sols_par, layout.n_solutions);
 
     let bold = Style::default().add_modifier(Modifier::BOLD);
     let cmd_text = vec![
@@ -182,7 +217,7 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
     ];
     let cmd_par = Paragraph::new(cmd_text)
         .block(Block::default().borders(Borders::ALL).title("Commands"));
-    f.render_widget(cmd_par, help_chunks[0]);
+    f.render_widget(cmd_par, layout.cmd_help);
 
     let lgd_text = vec![
         Spans::from(vec![
@@ -203,5 +238,5 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
     ];
     let lgd_par = Paragraph::new(lgd_text)
         .block(Block::default().borders(Borders::ALL).title("Legend"));
-    f.render_widget(lgd_par, help_chunks[1]);
+    f.render_widget(lgd_par, layout.legend);
 }
