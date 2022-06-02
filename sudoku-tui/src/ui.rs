@@ -53,7 +53,7 @@ fn cell_at(app: &App, row: usize, col: usize) -> Cell<'static> {
 /// Define the UI for a given state of the application.
 pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
     let height = 19;
-    let width = 72;
+    let width = 73;
     let full_area = f.size();
     if full_area.width < width || full_area.height < height {
         f.render_widget(
@@ -75,10 +75,11 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
         .direction(Direction::Horizontal)
         .constraints([
             Constraint::Length(43),
+            Constraint::Length(1),
             Constraint::Length(29),
         ])
         .split(area);
-    let help_chunks = chunks[1];
+    let help_chunks = chunks[2];
 
     let chunks = Layout::default()
         .direction(Direction::Vertical)
