@@ -1,8 +1,7 @@
 use std::collections::BTreeSet;
-use std::iter::FusedIterator;
 use std::num::NonZeroU8;
 
-use crate::solver::{possible_values, SolutionIterator};
+use crate::solver::{PossibleValuesFinder, SolutionIterator};
 
 /// Sudoku-shaped array holding a given type.
 pub type Grid<T> = [[T; 9]; 9];
@@ -182,13 +181,13 @@ impl Puzzle {
     /// assert_eq!(sols.next().unwrap(), expected2);
     /// assert!(sols.next().is_none());
     /// ```
-    pub fn solutions(&self) -> impl FusedIterator<Item = Grid<u8>> {
+    pub fn solutions(&self) -> SolutionIterator {
         SolutionIterator::new(self)
     }
 
     /// Compute the set of values in each cell that lead to a solvable grid.
     pub fn possible_values(&self) -> Grid<BTreeSet<u8>> {
-        possible_values(self)
+        PossibleValuesFinder::new().search(self)
     }
 }
 
