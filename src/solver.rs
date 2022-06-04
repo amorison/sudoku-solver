@@ -108,7 +108,7 @@ impl PossibleValuesFinder {
 
     /// Set the `Arc<AtomicBool>` to use as a "keep going" flag. Similarly to
     /// [`SolutionIterator::with_handle`], this is useful to have a way to stop
-    /// a separate thread running [`search`].
+    /// a separate thread running [`Self::search`].
     pub fn with_handle(keep_going: Arc<AtomicBool>) -> Self {
         Self { keep_going }
     }
