@@ -55,7 +55,10 @@ impl SoftConstraint {
 
     /// Iterate through possible values.
     pub fn all_values(&self) -> BTreeSet<Value> {
-        (1..=9).map(Value::new).filter(|&v| self.has_solution(v)).collect()
+        (1..=9)
+            .map(Value::new)
+            .filter(|&v| self.has_solution(v))
+            .collect()
     }
 }
 

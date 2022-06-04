@@ -1,7 +1,7 @@
+use crate::solgrid::SolutionGrid;
+use crate::{Grid, Puzzle};
 use std::collections::BTreeSet;
 use std::iter::FusedIterator;
-use crate::solgrid::SolutionGrid;
-use crate::{Puzzle, Grid};
 
 pub struct SolutionIterator {
     stack: Vec<SolutionGrid>,
@@ -9,7 +9,7 @@ pub struct SolutionIterator {
 
 impl SolutionIterator {
     pub fn new(problem: &Puzzle) -> Self {
-        let mut stack = Vec::with_capacity(81);  // could do better
+        let mut stack = Vec::with_capacity(81); // could do better
         if let Ok(grid) = problem.try_into() {
             stack.push(grid);
         }
@@ -29,7 +29,7 @@ impl Iterator for SolutionIterator {
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(mut grid) = self.stack.pop() {
             if grid.is_solved() {
-                return Some(Self::Item::try_from(grid).unwrap())
+                return Some(Self::Item::try_from(grid).unwrap());
             } else if let Some((row, col, sc)) = grid.find_least_sols_fuzzy() {
                 if let Some(val) = sc.smallest_solution() {
                     let mut new_grid = grid.clone();

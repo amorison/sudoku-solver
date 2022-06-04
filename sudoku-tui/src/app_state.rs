@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
-use sudoku_solver::{Puzzle, Grid, Value};
-use crate::counter::{CounterUpTo, count_saturated};
+use crate::counter::{count_saturated, CounterUpTo};
+use sudoku_solver::{Grid, Puzzle, Value};
 
 /// State of application, contains the sudoku puzzle.
 pub struct App {
@@ -88,13 +88,13 @@ impl App {
     pub fn move_pos(&mut self, direction: Direction) {
         match direction {
             Direction::Left => self.cur_col = (self.cur_col + 8) % 9,
-            Direction::Right => self.cur_col  = (self.cur_col + 1) % 9,
-            Direction::Up => self.cur_row  = (self.cur_row + 8) % 9,
-            Direction::Down => self.cur_row  = (self.cur_row + 1) % 9,
-            Direction::LeftBlock => self.cur_col  = (self.cur_col + 6) % 9,
-            Direction::RightBlock => self.cur_col  = (self.cur_col + 3) % 9,
-            Direction::UpBlock => self.cur_row  = (self.cur_row + 6) % 9,
-            Direction::DownBlock => self.cur_row  = (self.cur_row + 3) % 9,
+            Direction::Right => self.cur_col = (self.cur_col + 1) % 9,
+            Direction::Up => self.cur_row = (self.cur_row + 8) % 9,
+            Direction::Down => self.cur_row = (self.cur_row + 1) % 9,
+            Direction::LeftBlock => self.cur_col = (self.cur_col + 6) % 9,
+            Direction::RightBlock => self.cur_col = (self.cur_col + 3) % 9,
+            Direction::UpBlock => self.cur_row = (self.cur_row + 6) % 9,
+            Direction::DownBlock => self.cur_row = (self.cur_row + 3) % 9,
         }
     }
 
@@ -105,7 +105,6 @@ impl App {
 }
 
 impl Default for App {
-
     fn default() -> Self {
         let mut app = Self {
             puzzle: Default::default(),

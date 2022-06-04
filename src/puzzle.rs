@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::iter::FusedIterator;
 use std::num::NonZeroU8;
 
-use crate::solver::{SolutionIterator, possible_values};
+use crate::solver::{possible_values, SolutionIterator};
 
 /// Sudoku-shaped array holding a given type.
 pub type Grid<T> = [[T; 9]; 9];
@@ -114,11 +114,7 @@ impl Puzzle {
     /// assert_eq!(pzl.get(0, 0), None);
     /// ```
     pub fn from_arr(arr: Grid<u8>) -> Self {
-        let inner = arr.map(|row| {
-            row.map(|v| {
-                (v != 0).then(|| Value::new(v))
-            })
-        });
+        let inner = arr.map(|row| row.map(|v| (v != 0).then(|| Value::new(v))));
         Puzzle(inner)
     }
 
@@ -186,7 +182,7 @@ impl Puzzle {
     /// assert_eq!(sols.next().unwrap(), expected2);
     /// assert!(sols.next().is_none());
     /// ```
-    pub fn solutions(&self) -> impl FusedIterator<Item=Grid<u8>> {
+    pub fn solutions(&self) -> impl FusedIterator<Item = Grid<u8>> {
         SolutionIterator::new(self)
     }
 
@@ -237,7 +233,7 @@ mod tests {
             [0, 0, 0, 0, 0, 1, 0, 0, 0],
             [0, 9, 0, 1, 7, 0, 3, 0, 0],
             [0, 0, 7, 0, 0, 8, 0, 0, 0],
-            [0, 0, 0, 0, 0, 5, 0, 1, 0]
+            [0, 0, 0, 0, 0, 5, 0, 1, 0],
         ]);
         let expected = [
             [3, 5, 9, 4, 1, 2, 8, 7, 6],
@@ -248,7 +244,7 @@ mod tests {
             [7, 6, 3, 9, 4, 1, 2, 8, 5],
             [6, 9, 8, 1, 7, 4, 3, 5, 2],
             [5, 1, 7, 3, 2, 8, 6, 4, 9],
-            [2, 3, 4, 6, 9, 5, 7, 1, 8]
+            [2, 3, 4, 6, 9, 5, 7, 1, 8],
         ];
         let mut sols = p.solutions();
         assert!(sols.next().unwrap() == expected);
@@ -266,7 +262,7 @@ mod tests {
             [0, 2, 8, 0, 5, 0, 0, 4, 1],
             [0, 0, 0, 0, 0, 0, 5, 9, 0],
             [0, 0, 0, 1, 9, 6, 0, 0, 7],
-            [0, 0, 6, 0, 0, 0, 1, 0, 4]
+            [0, 0, 6, 0, 0, 0, 1, 0, 4],
         ]);
         assert_eq!(p.solutions().count(), 3);
     }

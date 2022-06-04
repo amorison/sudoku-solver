@@ -1,11 +1,11 @@
-use std::io;
-use tui::{backend::{CrosstermBackend}, Terminal};
 use crossterm::{
     execute,
     terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
 };
+use std::io;
 use sudoku_tui::app_state::App;
 use sudoku_tui::events::event_loop;
+use tui::{backend::CrosstermBackend, Terminal};
 
 fn main() -> io::Result<()> {
     // setup terminal
@@ -20,10 +20,7 @@ fn main() -> io::Result<()> {
 
     // restore terminal
     terminal::disable_raw_mode()?;
-    execute!(
-        term.backend_mut(),
-        LeaveAlternateScreen,
-    )?;
+    execute!(term.backend_mut(), LeaveAlternateScreen)?;
     term.show_cursor()?;
 
     if let Err(err) = res {

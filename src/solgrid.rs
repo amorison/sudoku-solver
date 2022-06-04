@@ -1,11 +1,11 @@
 use std::collections::BTreeSet;
 
-use crate::puzzle::{Value, Puzzle, Grid};
+use crate::puzzle::{Grid, Puzzle, Value};
 use crate::soft::SoftConstraint;
 
 /// Some operations return this type wrapped in an error to signal that the
 /// grid has no solution.
-pub struct NoSolError{}
+pub struct NoSolError {}
 
 /// Result of an operation susceptible to detect the puzzle has no solution.
 pub type SolResult<T> = Result<T, NoSolError>;
@@ -47,8 +47,8 @@ impl CellState {
             CellState::Fuzzy(sc) if sc.has_solution(val) => {
                 *self = CellState::Pinned(val);
                 Ok(())
-            },
-            _ => Err(NoSolError{}),
+            }
+            _ => Err(NoSolError {}),
         }
     }
 
@@ -57,9 +57,9 @@ impl CellState {
             CellState::Pinned(v) if val != *v => Ok(()),
             CellState::Fuzzy(sc) => {
                 sc.forbid(val);
-                (sc.has_solutions()).then(|| ()).ok_or(NoSolError{})
-            },
-            _ => Err(NoSolError{}),
+                (sc.has_solutions()).then(|| ()).ok_or(NoSolError {})
+            }
+            _ => Err(NoSolError {}),
         }
     }
 
@@ -69,10 +69,8 @@ impl CellState {
                 let mut bset = BTreeSet::new();
                 bset.insert(*v);
                 bset
-            },
-            CellState::Fuzzy(sc) => {
-                sc.all_values()
             }
+            CellState::Fuzzy(sc) => sc.all_values(),
         }
     }
 }
@@ -89,9 +87,7 @@ pub struct SolutionGrid([[CellState; 9]; 9]);
 
 impl SolutionGrid {
     pub fn is_solved(&self) -> bool {
-        self.0.iter()
-            .flatten()
-            .all(|cs| cs.is_fixed())
+        self.0.iter().flatten().all(|cs| cs.is_fixed())
     }
 
     pub fn pin(&mut self, row: usize, col: usize, val: Value) -> SolResult<()> {
@@ -193,12 +189,9 @@ impl TryFrom<SolutionGrid> for Grid<u8> {
 
     fn try_from(value: SolutionGrid) -> Result<Self, Self::Error> {
         if value.is_solved() {
-            Ok(value.0.map(|r| r.map(|cs| {
-                    cs.fixed_val().unwrap().value()
-            })))
+            Ok(value.0.map(|r| r.map(|cs| cs.fixed_val().unwrap().value())))
         } else {
             Err(())
         }
     }
 }
-
