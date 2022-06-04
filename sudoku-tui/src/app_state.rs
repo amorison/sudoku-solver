@@ -1,16 +1,14 @@
 use std::collections::BTreeSet;
 
-use crate::counter::{count_saturated, CounterUpTo};
-use sudoku_solver::{Grid, Puzzle, Value};
+use crate::{counter::CounterUpTo, detached::DetachedSolver};
+use sudoku_solver::{Puzzle, Value};
 
 /// State of application, contains the sudoku puzzle.
 pub struct App {
     puzzle: Puzzle,
     cur_row: usize,
     cur_col: usize,
-    solution: Option<Grid<u8>>,
-    n_sols: CounterUpTo,
-    all_sols: Grid<BTreeSet<u8>>,
+    solver: DetachedSolver,
 }
 
 /// All the possibilities for a cell in a sudoku puzzle.
@@ -19,6 +17,8 @@ pub enum CellValue {
     Pinned(u8),
     /// The value of the first solution found for the current puzzle.
     Solution(u8),
+    /// Solver is still running.
+    Pending,
     /// The current puzzle has no solution.
     NoSolution,
 }
@@ -39,9 +39,7 @@ impl App {
     /// This keeps the solution and diagnostics up-to-date with the puzzle.
     /// This has to be called everytime the puzzle is changed.
     fn update_solution(&mut self) {
-        self.solution = self.puzzle.solutions().next();
-        self.n_sols = count_saturated(&mut self.puzzle.solutions(), 1000);
-        self.all_sols = self.puzzle.possible_values();
+        self.solver = DetachedSolver::new(self.puzzle.clone(), 1000);
     }
 
     /// Set the value of the puzzle at the cursor position.
@@ -69,19 +67,23 @@ impl App {
     }
 
     /// The cell value at a given position.
-    pub fn value_at(&self, row: usize, col: usize) -> CellValue {
+    pub fn value_at(&mut self, row: usize, col: usize) -> CellValue {
         if let Some(v) = self.puzzle.get(row, col) {
             CellValue::Pinned(v.value())
-        } else if let Some(sol) = self.solution {
-            CellValue::Solution(sol[row][col])
+        } else if let Some(maybe_sol) = self.solver.poll_solution() {
+            if let Some(sol) = maybe_sol {
+                CellValue::Solution(sol[row][col])
+            } else {
+                CellValue::NoSolution
+            }
         } else {
-            CellValue::NoSolution
+            CellValue::Pending
         }
     }
 
     /// All possible values that give a solvable puzzle.
-    pub fn all_vals_at(&self, row: usize, col: usize) -> &BTreeSet<u8> {
-        &self.all_sols[row][col]
+    pub fn all_vals_at(&mut self, row: usize, col: usize) -> Option<&BTreeSet<u8>> {
+        self.solver.poll_possible_values().map(|arr| &arr[row][col])
     }
 
     /// Move the cursor in a given direction.
@@ -99,23 +101,19 @@ impl App {
     }
 
     /// Number of solutions of the current puzzle.
-    pub fn n_solutions(&self) -> CounterUpTo {
-        self.n_sols
+    pub fn n_solutions(&mut self) -> Option<&CounterUpTo> {
+        self.solver.poll_n_solutions()
     }
 }
 
 impl Default for App {
     fn default() -> Self {
-        let mut app = Self {
-            puzzle: Default::default(),
+        let puzzle = Puzzle::default();
+        Self {
+            puzzle: puzzle.clone(),
             cur_row: 0,
             cur_col: 0,
-            // these values don't matter, they are updated immediately after.
-            n_sols: CounterUpTo::Exactly(0),
-            solution: Default::default(),
-            all_sols: Default::default(),
-        };
-        app.update_solution();
-        app
+            solver: DetachedSolver::new(puzzle, 1000),
+        }
     }
 }

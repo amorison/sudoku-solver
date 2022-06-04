@@ -29,7 +29,7 @@ fn get_style(kind: CellKind) -> Style {
 }
 
 /// Build the cell content at a given position.
-fn cell_at(app: &App, row: usize, col: usize) -> Cell<'static> {
+fn cell_at(app: &mut App, row: usize, col: usize) -> Cell<'static> {
     let mut style = Style::default();
     let text = match app.value_at(row, col) {
         CellValue::Pinned(v) => {
@@ -37,12 +37,14 @@ fn cell_at(app: &App, row: usize, col: usize) -> Cell<'static> {
             format!(" {v} ")
         }
         CellValue::Solution(v) => {
-            if app.all_vals_at(row, col).len() == 1 {
-                style = style.patch(get_style(CellKind::UniqueSol));
+            if let Some(set) = app.all_vals_at(row, col) {
+                if set.len() == 1 {
+                    style = style.patch(get_style(CellKind::UniqueSol));
+                }
             }
             format!(" {v} ")
         }
-        CellValue::NoSolution => " . ".to_owned(),
+        CellValue::NoSolution | CellValue::Pending => " . ".to_owned(),
     };
     if (row, col) == app.current_pos() {
         style = style.patch(get_style(CellKind::Current));
@@ -117,7 +119,7 @@ impl UiLayout {
 }
 
 /// Define the UI for a given state of the application.
-pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
+pub fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let full_area = f.size();
     let layout = match UiLayout::new(full_area) {
         Ok(layout) => layout,
@@ -164,23 +166,28 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
     let all_sols_par = Paragraph::new(match app.value_at(row, col) {
         CellValue::Pinned(v) => format!("Cell pinned to {v}"),
         CellValue::Solution(v) => {
-            let values = app.all_vals_at(row, col);
-            if values.len() == 1 {
-                format!("Cell has to be {v}")
+            if let Some(values) = app.all_vals_at(row, col) {
+                if values.len() == 1 {
+                    format!("Cell has to be {v}")
+                } else {
+                    format!("Could be: {:?}", values)
+                }
             } else {
-                format!("Could be: {:?}", values)
+                "Solver is still running...".to_owned()
             }
         }
+        CellValue::Pending => "Solver is still running...".to_owned(),
         CellValue::NoSolution => "No solution.".to_owned(),
     })
     .block(Block::default().borders(Borders::ALL));
     f.render_widget(all_sols_par, layout.possibilities);
 
     let n_sols_par = Paragraph::new(match app.n_solutions() {
-        CounterUpTo::Exactly(0) => "No solution".to_owned(),
-        CounterUpTo::Exactly(1) => "Unique solution".to_owned(),
-        CounterUpTo::Exactly(n) => format!("{n} solutions"),
-        CounterUpTo::MoreThan(n) => format!("More than {n} solutions"),
+        Some(&CounterUpTo::Exactly(0)) => "No solution".to_owned(),
+        Some(&CounterUpTo::Exactly(1)) => "Unique solution".to_owned(),
+        Some(&CounterUpTo::Exactly(n)) => format!("{n} solutions"),
+        Some(&CounterUpTo::MoreThan(n)) => format!("More than {n} solutions"),
+        None => "Solver is still running...".to_owned(),
     })
     .block(Block::default().borders(Borders::ALL));
     f.render_widget(n_sols_par, layout.n_solutions);
