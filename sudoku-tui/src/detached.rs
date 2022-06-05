@@ -55,6 +55,13 @@ impl DetachedSolver {
     pub fn poll_n_solutions(&mut self) -> Option<&CounterUpTo> {
         self.n_solutions.try_join()
     }
+
+    /// Whether all solvers are joined.
+    pub fn is_done(&self) -> bool {
+        self.solution.is_joined()
+            && self.possible_values.is_joined()
+            && self.n_solutions.is_joined()
+    }
 }
 
 impl Drop for DetachedSolver {

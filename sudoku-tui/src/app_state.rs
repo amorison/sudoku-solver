@@ -104,6 +104,10 @@ impl App {
     pub fn n_solutions(&mut self) -> Option<&CounterUpTo> {
         self.solver.poll_n_solutions()
     }
+
+    pub fn solver_is_done(&self) -> bool {
+        self.solver.is_done()
+    }
 }
 
 impl Default for App {

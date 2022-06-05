@@ -64,4 +64,9 @@ impl<T> Threaded<T> {
     pub fn try_join(&mut self) -> Option<&T> {
         self.0.try_join()
     }
+
+    /// Whether the underlying thread has been joined already.
+    pub fn is_joined(&self) -> bool {
+        matches!(self.0, ThreadedState::Joined(_))
+    }
 }

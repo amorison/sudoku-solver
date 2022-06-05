@@ -12,7 +12,7 @@ use crate::{
 pub fn event_loop<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
-        if event::poll(Duration::from_millis(30))? {
+        if app.solver_is_done() || event::poll(Duration::from_millis(10))? {
             if let Event::Key(key) = event::read()? {
                 match key.code {
                     KeyCode::Char('h' | 'a') | KeyCode::Left => app.move_pos(Direction::Left),
