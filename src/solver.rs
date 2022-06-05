@@ -146,3 +146,9 @@ impl PossibleValuesFinder {
         pvs
     }
 }
+
+impl Default for PossibleValuesFinder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
