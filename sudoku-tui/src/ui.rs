@@ -1,9 +1,9 @@
 use tui::{
     backend::Backend,
-    layout::{Constraint, Direction, Layout, Margin, Rect},
+    layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, Borders, Cell, Paragraph, Row, Table},
+    widgets::{Block, Borders, Cell, Paragraph, Row, Table, Widget},
     Frame,
 };
 
@@ -118,6 +118,61 @@ impl UiLayout {
     }
 }
 
+/// Widget of the sudoku table
+struct SudokuTable<'a> {
+    table: Table<'static>,
+    block: Option<Block<'a>>,
+}
+
+impl<'a> SudokuTable<'a> {
+    fn new(app: &mut App) -> Self {
+        let table = Table::new((0..11).map(|ir| {
+            let row = ir - ir / 4;
+            if ir == 3 || ir == 7 {
+                Row::default().height(1)
+            } else {
+                Row::new((0..11).map(|ic| {
+                    let col = ic - ic / 4;
+                    if ic == 3 || ic == 7 {
+                        Cell::default()
+                    } else {
+                        cell_at(app, row, col)
+                    }
+                }))
+            }
+        }));
+        Self { table, block: None }
+    }
+
+    fn block(self, block: Block<'a>) -> Self {
+        Self {
+            block: Some(block),
+            ..self
+        }
+    }
+}
+
+impl Widget for SudokuTable<'_> {
+    fn render(self, area: Rect, buf: &mut tui::buffer::Buffer) {
+        let blk_pad = self.block.is_some().then(|| 2).unwrap_or(0);
+        let mut inner = area;
+        inner.width = 39;
+        inner.height = 11;
+        if area.width < (inner.width + blk_pad) || area.height < (inner.height + blk_pad) {
+            return;
+        }
+        if let Some(block) = self.block {
+            block.render(area, buf);
+        }
+        inner.x += (area.width - inner.width) / 2;
+        inner.y += (area.height - inner.height) / 2;
+        let mut widths = [Constraint::Length(3); 11];
+        widths[3] = Constraint::Length(1);
+        widths[7] = Constraint::Length(1);
+        self.table.widths(&widths).render(inner, buf);
+    }
+}
+
 /// Define the UI for a given state of the application.
 pub fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let full_area = f.size();
@@ -132,34 +187,8 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         }
     };
     f.render_widget(
-        Block::default().title("Sudoku").borders(Borders::ALL),
+        SudokuTable::new(app).block(Block::default().title("Sudoku").borders(Borders::ALL)),
         layout.grid,
-    );
-    let mut widths = [Constraint::Length(3); 11];
-    widths[3] = Constraint::Length(1);
-    widths[7] = Constraint::Length(1);
-    let table = Table::new((0..11).map(|ir| {
-        let row = ir - ir / 4;
-        if ir == 3 || ir == 7 {
-            Row::default().height(1)
-        } else {
-            Row::new((0..11).map(|ic| {
-                let col = ic - ic / 4;
-                if ic == 3 || ic == 7 {
-                    Cell::default()
-                } else {
-                    cell_at(app, row, col)
-                }
-            }))
-        }
-    }))
-    .widths(&widths);
-    f.render_widget(
-        table,
-        layout.grid.inner(&Margin {
-            vertical: 1,
-            horizontal: 2,
-        }),
     );
 
     let (row, col) = app.current_pos();
