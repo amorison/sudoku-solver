@@ -7,5 +7,4 @@ edition = "2021"
 
 [dependencies]
 sudoku-solver = { path = "..", version = "0.1.0" }
-tui = "0.18.0"
-crossterm = "0.23"
+ratatui = "0.28.0"

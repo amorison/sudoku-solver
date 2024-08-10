@@ -1,7 +1,10 @@
 use std::{io, time::Duration};
 
-use crossterm::event::{self, Event, KeyCode};
-use tui::{backend::Backend, Terminal};
+use ratatui::{
+    backend::Backend,
+    crossterm::event::{self, Event, KeyCode},
+    Terminal,
+};
 
 use crate::{
     app_state::{App, Direction},

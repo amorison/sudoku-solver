@@ -1,8 +1,8 @@
-use tui::{
-    backend::Backend,
+use ratatui::{
+    buffer,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
-    text::{Span, Spans},
+    text::{Line, Span},
     widgets::{Block, Borders, Cell, Paragraph, Row, Table, Widget},
     Frame,
 };
@@ -126,7 +126,7 @@ struct SudokuTable<'a> {
 
 impl<'a> SudokuTable<'a> {
     fn new(app: &mut App) -> Self {
-        let table = Table::new((0..11).map(|ir| {
+        let table = Table::default().rows((0..11).map(|ir| {
             let row = ir - ir / 4;
             if ir == 3 || ir == 7 {
                 Row::default().height(1)
@@ -153,7 +153,7 @@ impl<'a> SudokuTable<'a> {
 }
 
 impl Widget for SudokuTable<'_> {
-    fn render(self, area: Rect, buf: &mut tui::buffer::Buffer) {
+    fn render(self, area: Rect, buf: &mut buffer::Buffer) {
         let blk_pad = self.block.is_some().then(|| 2).unwrap_or(0);
         let mut inner = area;
         inner.width = 39;
@@ -174,13 +174,13 @@ impl Widget for SudokuTable<'_> {
 }
 
 /// Define the UI for a given state of the application.
-pub fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
-    let full_area = f.size();
+pub fn ui(f: &mut Frame, app: &mut App) {
+    let full_area = f.area();
     let layout = match UiLayout::new(full_area) {
         Ok(layout) => layout,
         Err(err) => {
             f.render_widget(
-                Paragraph::new(vec![Spans::from(err), Spans::from("q to quit")]),
+                Paragraph::new(vec![Line::from(err), Line::from("q to quit")]),
                 full_area,
             );
             return;
@@ -223,40 +223,40 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let bold = Style::default().add_modifier(Modifier::BOLD);
     let cmd_text = vec![
-        Spans::from(vec![
+        Line::from(vec![
             Span::styled("<hjkl, wsad>", bold),
             Span::raw(": move"),
         ]),
-        Spans::from(vec![
+        Line::from(vec![
             Span::styled("<HJKL, WSAD>", bold),
             Span::raw(": block-move"),
         ]),
-        Spans::from(vec![Span::styled("<1-9>", bold), Span::raw(": pin value")]),
-        Spans::from(vec![
+        Line::from(vec![Span::styled("<1-9>", bold), Span::raw(": pin value")]),
+        Line::from(vec![
             Span::styled("<0, Space, Suppr>", bold),
             Span::raw(": unpin"),
         ]),
-        Spans::from(vec![Span::styled("<c>", bold), Span::raw(": clear")]),
-        Spans::from(vec![Span::styled("<q>", bold), Span::raw(": quit")]),
+        Line::from(vec![Span::styled("<c>", bold), Span::raw(": clear")]),
+        Line::from(vec![Span::styled("<q>", bold), Span::raw(": quit")]),
     ];
     let cmd_par =
         Paragraph::new(cmd_text).block(Block::default().borders(Borders::ALL).title("Commands"));
     f.render_widget(cmd_par, layout.cmd_help);
 
     let lgd_text = vec![
-        Spans::from(vec![
+        Line::from(vec![
             Span::styled(" 1 ", get_style(CellKind::Current)),
             Span::raw(": current cell"),
         ]),
-        Spans::from(vec![
+        Line::from(vec![
             Span::styled(" 2 ", get_style(CellKind::Pinned)),
             Span::raw(": pinned value"),
         ]),
-        Spans::from(vec![
+        Line::from(vec![
             Span::styled(" 3 ", get_style(CellKind::UniqueSol)),
             Span::raw(": only one possibility"),
         ]),
-        Spans::from(vec![Span::raw(" 4 : several possibilities")]),
+        Line::from(vec![Span::raw(" 4 : several possibilities")]),
     ];
     let lgd_par =
         Paragraph::new(lgd_text).block(Block::default().borders(Borders::ALL).title("Legend"));

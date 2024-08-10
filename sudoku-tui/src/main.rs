@@ -1,11 +1,14 @@
-use crossterm::{
-    execute,
-    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
+use ratatui::{
+    backend::CrosstermBackend,
+    crossterm::{
+        execute,
+        terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
+    },
+    Terminal,
 };
 use std::io;
 use sudoku_tui::app_state::App;
 use sudoku_tui::events::event_loop;
-use tui::{backend::CrosstermBackend, Terminal};
 
 fn main() -> io::Result<()> {
     // setup terminal
